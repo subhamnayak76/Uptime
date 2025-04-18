@@ -12,7 +12,8 @@ export const pingUrl = async (url: string): Promise<{
       isUp: res.status >= 200 && res.status < 400,
       statusCode: res.status,
     };
-  } catch {
+  } catch (err:any){
+    console.log(`❌ Failed to ping ${url}:`, err.message);
     return {
       isUp: false,
     };

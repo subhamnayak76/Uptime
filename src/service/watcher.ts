@@ -35,7 +35,8 @@ const runWatcher = async () =>{
             where: { id: monitor.id },
             data: { lastPingedAt: now },
           });
-          if (lastResult && lastResult.isUp !== isUp) {
+          if (lastResult && lastResult.isUp !== isUp || lastResult?.isUp === false) {
+            console.log(`Trying to publish status...`);
             await publishStatusChange(monitor.id, isUp ? 'UP' : 'DOWN');
             console.log(`🔁 Status changed for ${monitor.url}: ${isUp ? 'UP' : 'DOWN'}`);
           }
