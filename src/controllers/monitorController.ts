@@ -24,8 +24,16 @@ const createMonitor = async (req:Request,res: Response) =>{
 
 const getAllMonitors = async (req:Request,res:Response) =>{
     try{
+        const userId = req.userId
         const monitors = await prisma.monitor.findMany({
-            include:{pingResults: true}
+            where :{ userId},
+            include :{
+                pingResults :{
+                    orderBy : {
+                        timestamp :'desc'
+                    }
+                }
+            }
         })
         res.status(200).json(monitors)
     }
@@ -36,9 +44,6 @@ const getAllMonitors = async (req:Request,res:Response) =>{
     }
     
 }
-
-
-
 const getMonitorById = async(req: Request,res:Response) => {
     try {
         const {id} = req.params
@@ -58,5 +63,37 @@ const getMonitorById = async(req: Request,res:Response) => {
     }
 }
 
+const deleteMonitor = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params; 
+        const userId = req.userId as string; 
+        const monitor = await prisma.monitor.findUnique({
+            where: {
+                id: id,
+            },
+        });
 
-export default {createMonitor,getAllMonitors,getMonitorById}
+        if (!monitor || monitor.userId !== userId) {
+             res.status(404).json({ message: 'Monitor not found or access denied' });
+             return
+        }
+        await prisma.pingResult.deleteMany({
+            where: { monitorId: id },
+        });
+        
+        await prisma.monitor.delete({
+            where: {
+                id: id,
+                
+            },
+        });
+
+        res.status(204).send(); 
+
+    } catch (error) {
+        console.error('Error deleting monitor:', error);
+        res.status(500).json({ message: 'Internal server error while deleting monitor' });
+    }
+};
+
+export default {createMonitor,getAllMonitors,getMonitorById, deleteMonitor}

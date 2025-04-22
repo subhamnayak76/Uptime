@@ -48,7 +48,7 @@ const login = async (req:Request,res:Response) =>{
             email
         }
     })
-    console.log(user)
+    
     if(!user || !(await bcrypt.compare(password,user.password))){
         res.status(401).json({message : "invalid credentials"})
         return

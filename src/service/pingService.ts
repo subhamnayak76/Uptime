@@ -1,4 +1,4 @@
-// src/services/pingService.ts
+
 import axios from 'axios';
 
 export const pingUrl = async (url: string): Promise<{
@@ -13,7 +13,7 @@ export const pingUrl = async (url: string): Promise<{
       statusCode: res.status,
     };
   } catch (err:any){
-    console.log(`❌ Failed to ping ${url}:`, err.message);
+    console.log(` Failed to ping ${url}:`, err.message);
     return {
       isUp: false,
     };

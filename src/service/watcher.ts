@@ -5,11 +5,8 @@ import { publishStatusChange } from "../pubsub/publisher";
 import cron from 'node-cron'
 const prisma = new PrismaClient()
 
-
-
 const runWatcher = async () =>{
     const now = new Date()
-
     const monitors = await prisma.monitor.findMany()
 
     for (const monitor of monitors) {
@@ -35,11 +32,16 @@ const runWatcher = async () =>{
             where: { id: monitor.id },
             data: { lastPingedAt: now },
           });
-          if (lastResult && lastResult.isUp !== isUp || lastResult?.isUp === false) {
-            console.log(`Trying to publish status...`);
-            await publishStatusChange(monitor.id, isUp ? 'UP' : 'DOWN');
-            console.log(`🔁 Status changed for ${monitor.url}: ${isUp ? 'UP' : 'DOWN'}`);
-          }
+          
+        if (!lastResult) {
+    
+        await publishStatusChange(monitor.id, isUp ? 'UP' : 'DOWN');
+        console.log(`Initial status for ${monitor.url}: ${isUp ? 'UP' : 'DOWN'}`);
+        } else if (lastResult.isUp !== isUp) {
+    
+        await publishStatusChange(monitor.id, isUp ? 'UP' : 'DOWN');
+        console.log(`Status changed for ${monitor.url}: ${isUp ? 'UP' : 'DOWN'}`);
+  }
         } catch(e) {
             console.log('some error occured',e)
 
@@ -48,7 +50,9 @@ const runWatcher = async () =>{
 }
 
 
-cron.schedule('*/15 * * * * *', async () => {
-    console.log('⏱ Running watcher...');
+cron.schedule('* * * * * *', async () => {
+    console.log('Running watcher...');
     await runWatcher();
   });
+
+
