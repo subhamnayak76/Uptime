@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
-const ACCESS_TOKEN_SECRET = 'supersecret'
-const REFRESH_TOKEN_SECRET = 'heavysecret'
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN || ''
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN || ''
 
 export const generateAccessToken = (userId :string): string => {
     return jwt.sign({id : userId},ACCESS_TOKEN_SECRET,{expiresIn :'15m'})
